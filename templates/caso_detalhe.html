@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-file-text"></i> Caso #{{ caso.id }}</h2>
+    </div>
+    <div class="col text-end">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Detalhes do Caso</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tr>
+                        <th style="width: 200px;">Cliente:</th>
+                        <td>{{ caso.cliente_nome }}</td>
+                    </tr>
+                    <tr>
+                        <th>Pedido:</th>
+                        <td>{{ caso.pedido_numero }}</td>
+                    </tr>
+                    <tr>
+                        <th>NF:</th>
+                        <td>{{ caso.nf_numero }}</td>
+                    </tr>
+                    <tr>
+                        <th>NF Referência:</th>
+                        <td>{{ caso.nf_referencia or 'Não informado' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tipo:</th>
+                        <td>
+                            {% if caso.tipo_caso == 'troca' %}
+                                <span class="badge bg-info">Troca</span>
+                            {% elif caso.tipo_caso == 'devolucao' %}
+                                <span class="badge bg-warning">Devolução</span>
+                            {% else %}
+                                <span class="badge bg-danger">Defeito</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            {% if caso.status == 'aguardando' %}
+                                <span class="badge bg-warning">Aguardando</span>
+                            {% elif caso.status == 'aprovado' %}
+                                <span class="badge bg-success">Aprovado</span>
+                            {% else %}
+                                <span class="badge bg-danger">Reprovado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Valor da Compra:</th>
+                        <td>
+                            {% if caso.valor_compra %}
+                                R$ {{ "%.2f"|format(caso.valor_compra) }}
+                            {% else %}
+                                Não informado
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Valor Fábrica:</th>
+                        <td>
+                            {% if caso.valor_fabrica %}
+                                R$ {{ "%.2f"|format(caso.valor_fabrica) }}
+                            {% else %}
+                                Não informado
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Data Criação:</th>
+                        <td>{{ caso.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                    {% if caso.data_aprovacao %}
+                    <tr>
+                        <th>Data Aprovação:</th>
+                        <td>{{ caso.data_aprovacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if caso.data_reprovacao %}
+                    <tr>
+                        <th>Data Reprovação:</th>
+                        <td>{{ caso.data_reprovacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Registrado por:</th>
+                        <td>{{ caso.usuario_criador.username }}</td>
+                    </tr>
+                    {% if caso.usuario_aprovador %}
+                    <tr>
+                        <th>Aprovado por:</th>
+                        <td>{{ caso.usuario_aprovador.username }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if caso.usuario_reprovador %}
+                    <tr>
+                        <th>Reprovado por:</th>
+                        <td>{{ caso.usuario_reprovador.username }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+                
+                <div class="mt-4">
+                    <h6>Descrição:</h6>
+                    <div class="border p-3 bg-light">
+                        {{ caso.descricao }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Fotos -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Fotos Anexadas</h5>
+            </div>
+            <div class="card-body">
+                {% if caso.uploads %}
+                    <div class="row">
+                        {% for upload in caso.uploads %}
+                            <div class="col-6 mb-3">
+                                <a href="{{ url_for('static', filename='uploads/' + upload.filename) }}" target="_blank">
+                                    <img src="{{ url_for('static', filename='uploads/' + upload.filename) }}" 
+                                         class="img-fluid rounded img-thumbnail" alt="Foto">
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Nenhuma foto anexada.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Ações -->
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Ações</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if caso.status == 'aguardando' %}
+                        <a href="{{ url_for('aprovar_caso', id=caso.id) }}" class="btn btn-success"
+                           onclick="return confirm('Confirmar aprovação deste caso? O email será enviado.')">
+                            <i class="bi bi-check-circle"></i> Aprovar
+                        </a>
+                        <a href="{{ url_for('reprovar_caso', id=caso.id) }}" class="btn btn-danger"
+                           onclick="return confirm('Confirmar reprovação deste caso?')">
+                            <i class="bi bi-x-circle"></i> Reprovar
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('editar_caso', id=caso.id) }}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    
+                    <!-- Botão Apagar (só para admin ou quem criou) -->
+                    {% if current_user.id == caso.user_id or current_user.username == 'admin' %}
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalApagar">
+                        <i class="bi bi-trash"></i> Apagar Caso
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação para Apagar -->
+<div class="modal fade" id="modalApagar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja apagar o caso <strong>#{{ caso.id }} - {{ caso.cliente_nome }}</strong>?</p>
+                <p class="text-danger">Esta ação não pode ser desfeita!</p>
+            </div>
+            <div class="modal-footer">
+                <form action="{{ url_for('apagar_caso', id=caso.id) }}" method="POST">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Apagar Permanentemente</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

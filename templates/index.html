@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4">Sistema de Gestão de Trocas e Devoluções</h1>
+        <p class="lead mt-4">
+            Gerencie todos os casos de troca, devolução e defeito de forma simples e eficiente.
+        </p>
+        <hr class="my-4">
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="bi bi-arrow-repeat display-4 text-primary"></i>
+                        <h5 class="card-title mt-3">Registro de Casos</h5>
+                        <p class="card-text">Registre novos casos com fotos e informações detalhadas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle display-4 text-success"></i>
+                        <h5 class="card-title mt-3">Aprovação Rápida</h5>
+                        <p class="card-text">Aprove ou reprove casos com um clique.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="bi bi-envelope display-4 text-info"></i>
+                        <h5 class="card-title mt-3">Notificação Automática</h5>
+                        <p class="card-text">Envio automático de email para o SAC quando aprovado.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if not current_user.is_authenticated %}
+            <div class="mt-5">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-3">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">Registrar</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
